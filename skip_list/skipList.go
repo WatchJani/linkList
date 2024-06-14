@@ -1,6 +1,7 @@
 package skipList
 
 import (
+	"fmt"
 	"math/rand"
 	"root/stack"
 )
@@ -56,6 +57,7 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 		}
 
 		prevuesNode = newNode
+		tower++
 	}
 
 	//update root node
@@ -65,19 +67,63 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 	}
 }
 
-func (s *SkipList) Add(key, value int) error {
-	//search -> return left node from search
+// left <-> right | search
+func (s *SkipList) Search(key int) *Node {
+	current := s.Root
 
-	//create node
-	//update left right side
-	//flip coin
-	//link to next node from another level
+	for i := s.CurrentLevel; i > 0; i-- {
+		for current.RightLink != nil && current.Key < key {
+			current = current.RightLink
+		}
+		for current.LeftLink != nil && current.Key > key {
+			current = current.LeftLink
+		}
 
-	//create new node
-	newNode := NewNode(key, value)
+		if current.NextNode != nil {
+			current = current.NextNode
+			s.Stack.Push(current)
+		}
+	}
 
-	//
-	s.BuildTower(newNode)
+	return current
+}
 
-	return nil
+// search
+// insert new node(search *node)()
+// need i update
+// update ()(new *node)
+func (s *SkipList) Add(key, value int) {
+	// Search for the position to insert the new node.
+	current := s.Search(key)
+
+	//Create new Node
+	zeroLevelNode := NewNode(key, value)
+
+	//update if exist
+	if current != nil {
+		rightNode := current.RightLink
+		zeroLevelNode.LeftLink = current
+		zeroLevelNode.RightLink = rightNode
+	}
+
+	s.BuildTower(zeroLevelNode)
+}
+
+func (s *SkipList) Print() {
+	current := s.Root
+
+	for i := s.CurrentLevel; i > 0; i-- {
+		for current.LeftLink != nil {
+			current = current.LeftLink
+		}
+
+		if current.NextNode != nil {
+			current = current.NextNode
+		}
+	}
+
+	for current != nil {
+		fmt.Println(current.Key)
+		current = current.RightLink
+	}
 }
