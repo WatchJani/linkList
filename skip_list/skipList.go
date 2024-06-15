@@ -54,6 +54,11 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 			rightNode := node.RightLink
 			newNode.LeftLink = node
 			newNode.RightLink = rightNode
+
+			node.RightLink = newNode
+			if rightNode != nil {
+				rightNode.LeftLink = newNode
+			}
 		}
 
 		prevuesNode = newNode
@@ -96,17 +101,25 @@ func (s *SkipList) Add(key, value int) {
 	// Search for the position to insert the new node.
 	current := s.Search(key)
 
+	// fmt.Println("current", current)
+
 	//Create new Node
 	zeroLevelNode := NewNode(key, value)
 
 	//update if exist
 	if current != nil {
-		rightNode := current.RightLink
-		zeroLevelNode.LeftLink = current
-		zeroLevelNode.RightLink = rightNode
+		rightNode := current.RightLink      //save right
+		zeroLevelNode.LeftLink = current    //link left
+		zeroLevelNode.RightLink = rightNode //link
+
+		current.RightLink = zeroLevelNode //link left node with new node
+		if rightNode != nil {
+			rightNode.LeftLink = zeroLevelNode
+		}
 	}
 
 	s.BuildTower(zeroLevelNode)
+	s.Flush()
 }
 
 func (s *SkipList) Print() {

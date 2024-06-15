@@ -25,3 +25,7 @@ func (s *Stack[T]) Pop() T {
 	s.store = s.store[:len-1] //remove last value
 	return value
 }
+
+func (s *Stack[T]) Flush() {
+	s.store = s.store[:0]
+}
