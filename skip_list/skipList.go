@@ -92,8 +92,8 @@ func (s *SkipList) Search(key int) *Node {
 		}
 
 		if current.NextNode != nil {
-			current = current.NextNode
 			s.Stack.Push(current)
+			current = current.NextNode
 		}
 	}
 
