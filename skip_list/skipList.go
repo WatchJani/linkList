@@ -96,21 +96,22 @@ func (s *SkipList) Search(key int) *Node {
 }
 
 func (s *SkipList) Add(key, value int) {
-	// Search for the position to insert the new node.
+	zeroLevelNode := NewNode(key, value)
 	current := s.Search(key)
 
-	//Create new Node
-	zeroLevelNode := NewNode(key, value)
-
-	//update if exist
 	if current != nil {
-		rightNode := current.RightLink      //save right
-		zeroLevelNode.LeftLink = current    //link left
-		zeroLevelNode.RightLink = rightNode //link
+		if key > current.Key {
+			rightNode := current.RightLink      //save right
+			zeroLevelNode.LeftLink = current    //link left
+			zeroLevelNode.RightLink = rightNode //link
 
-		current.RightLink = zeroLevelNode //link left node with new node
-		if rightNode != nil {
-			rightNode.LeftLink = zeroLevelNode
+			current.RightLink = zeroLevelNode //link left node with new node
+			if rightNode != nil {
+				rightNode.LeftLink = zeroLevelNode
+			}
+		} else {
+			zeroLevelNode.RightLink = current
+			current.LeftLink = zeroLevelNode
 		}
 	}
 
@@ -121,19 +122,15 @@ func (s *SkipList) Add(key, value int) {
 func (s *SkipList) Print() {
 	current := s.Root
 
-	fmt.Println(current)
 	for i := s.CurrentLevel; i > 0; i-- {
 		for current.LeftLink != nil {
 			current = current.LeftLink
-			fmt.Println(current.Key)
 		}
 
 		if current.NextNode != nil {
 			current = current.NextNode
 		}
 	}
-
-	fmt.Println("=========================")
 
 	var counter int
 	for current != nil {
