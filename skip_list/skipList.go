@@ -42,27 +42,27 @@ func FlipTheCoin(luck float64) bool {
 }
 
 func (s *SkipList) BuildTower(prevuesNode *Node) {
-	key, value, tower := prevuesNode.Key, prevuesNode.Value, 1 //this is the problem!!!
+	_, _, tower := prevuesNode.Key, prevuesNode.Value, 1 //this is the problem!!!
 
 	for FlipTheCoin(s.Luck) && tower < s.MaxLevel {
 		//update next link by horizontally
-		newNode := NewNode(key, value)
-		newNode.NextNode = prevuesNode //next node is node up
+		// newNode := NewNode(key, value)
+		// newNode.NextNode = prevuesNode //next node is node up
 
-		//update left right link
-		if node := s.Stack.Pop(); node != nil {
-			rightNode := node.RightLink
-			newNode.LeftLink = node
-			newNode.RightLink = rightNode
+		// //update left right link
+		// if node := s.Stack.Pop(); node != nil {
+		// 	rightNode := node.RightLink
+		// 	newNode.LeftLink = node
+		// 	newNode.RightLink = rightNode
 
-			node.RightLink = newNode
-			if rightNode != nil {
-				rightNode.LeftLink = newNode
-			}
-		}
+		// 	node.RightLink = newNode
+		// 	if rightNode != nil {
+		// 		rightNode.LeftLink = newNode
+		// 	}
+		// }
 
-		prevuesNode = newNode
-		tower++
+		// prevuesNode = newNode
+		// tower++
 	}
 
 	//update root node
@@ -80,6 +80,8 @@ func (s *SkipList) Search(key int) *Node {
 		for current.RightLink != nil && current.RightLink.Key < key { //stop on left side
 			current = current.RightLink
 		}
+
+		//what if we have one element(root) and new element is lower then root
 		for current.LeftLink != nil && current.Key > key {
 			current = current.LeftLink
 		}
@@ -93,16 +95,9 @@ func (s *SkipList) Search(key int) *Node {
 	return current
 }
 
-// search
-// insert new node(search *node)()
-// need i update
-// update ()(new *node)
 func (s *SkipList) Add(key, value int) {
 	// Search for the position to insert the new node.
 	current := s.Search(key)
-	// if current != nil {
-	// 	fmt.Println(key == current.Key+1)
-	// }
 
 	//Create new Node
 	zeroLevelNode := NewNode(key, value)
@@ -126,15 +121,19 @@ func (s *SkipList) Add(key, value int) {
 func (s *SkipList) Print() {
 	current := s.Root
 
+	fmt.Println(current)
 	for i := s.CurrentLevel; i > 0; i-- {
 		for current.LeftLink != nil {
 			current = current.LeftLink
+			fmt.Println(current.Key)
 		}
 
 		if current.NextNode != nil {
 			current = current.NextNode
 		}
 	}
+
+	fmt.Println("=========================")
 
 	var counter int
 	for current != nil {
@@ -145,3 +144,5 @@ func (s *SkipList) Print() {
 
 	fmt.Println(counter)
 }
+
+//broj gresaka je jednak broju popa unutar builda
