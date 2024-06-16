@@ -42,27 +42,32 @@ func FlipTheCoin(luck float64) bool {
 }
 
 func (s *SkipList) BuildTower(prevuesNode *Node) {
-	_, _, tower := prevuesNode.Key, prevuesNode.Value, 1 //this is the problem!!!
+	key, value, tower := prevuesNode.Key, prevuesNode.Value, 1 //this is the problem!!!
 
 	for FlipTheCoin(s.Luck) && tower < s.MaxLevel {
 		//update next link by horizontally
-		// newNode := NewNode(key, value)
-		// newNode.NextNode = prevuesNode //next node is node up
+		newNode := NewNode(key, value)
+		newNode.NextNode = prevuesNode //next node is node up
 
-		// //update left right link
-		// if node := s.Stack.Pop(); node != nil {
-		// 	rightNode := node.RightLink
-		// 	newNode.LeftLink = node
-		// 	newNode.RightLink = rightNode
+		//update left right link
+		if node := s.Stack.Pop(); node != nil {
+			if key > node.Key {
+				rightNode := node.RightLink
+				newNode.LeftLink = node
+				newNode.RightLink = rightNode
 
-		// 	node.RightLink = newNode
-		// 	if rightNode != nil {
-		// 		rightNode.LeftLink = newNode
-		// 	}
-		// }
+				node.RightLink = newNode
+				if rightNode != nil {
+					rightNode.LeftLink = newNode
+				}
+			} else {
+				newNode.RightLink = node
+				node.LeftLink = newNode
+			}
+		}
 
-		// prevuesNode = newNode
-		// tower++
+		prevuesNode = newNode
+		tower++
 	}
 
 	//update root node
@@ -100,6 +105,7 @@ func (s *SkipList) Add(key, value int) {
 	current := s.Search(key)
 
 	if current != nil {
+		//in the middle and right
 		if key > current.Key {
 			rightNode := current.RightLink      //save right
 			zeroLevelNode.LeftLink = current    //link left
@@ -110,6 +116,7 @@ func (s *SkipList) Add(key, value int) {
 				rightNode.LeftLink = zeroLevelNode
 			}
 		} else {
+			//just left side
 			zeroLevelNode.RightLink = current
 			current.LeftLink = zeroLevelNode
 		}
@@ -141,5 +148,3 @@ func (s *SkipList) Print() {
 
 	fmt.Println(counter)
 }
-
-//broj gresaka je jednak broju popa unutar builda
