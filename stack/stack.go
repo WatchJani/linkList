@@ -29,3 +29,7 @@ func (s *Stack[T]) Pop() T {
 func (s *Stack[T]) Flush() {
 	s.store = s.store[:0]
 }
+
+func (s *Stack[T]) Len() int {
+	return len(s.store)
+}
