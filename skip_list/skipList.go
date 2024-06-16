@@ -47,7 +47,7 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 	for FlipTheCoin(s.Luck) && tower < s.MaxLevel {
 		//update next link by horizontally
 		newNode := NewNode(key, value)
-		newNode.NextNode = prevuesNode
+		newNode.NextNode = prevuesNode //next node is node up
 
 		//update left right link
 		if node := s.Stack.Pop(); node != nil {
@@ -77,7 +77,7 @@ func (s *SkipList) Search(key int) *Node {
 	current := s.Root
 
 	for i := s.CurrentLevel; i > 0; i-- {
-		for current.RightLink != nil && current.Key < key {
+		for current.RightLink != nil && current.RightLink.Key < key { //stop on left side
 			current = current.RightLink
 		}
 		for current.LeftLink != nil && current.Key > key {
@@ -100,8 +100,9 @@ func (s *SkipList) Search(key int) *Node {
 func (s *SkipList) Add(key, value int) {
 	// Search for the position to insert the new node.
 	current := s.Search(key)
-
-	// fmt.Println("current", current)
+	// if current != nil {
+	// 	fmt.Println(key == current.Key+1)
+	// }
 
 	//Create new Node
 	zeroLevelNode := NewNode(key, value)
@@ -135,8 +136,12 @@ func (s *SkipList) Print() {
 		}
 	}
 
+	var counter int
 	for current != nil {
+		counter++
 		fmt.Println(current.Key)
 		current = current.RightLink
 	}
+
+	fmt.Println(counter)
 }
