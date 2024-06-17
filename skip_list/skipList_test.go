@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// 1355 ns/op
 func BenchmarkSpeedInsert(b *testing.B) {
 	b.StopTimer()
 
@@ -17,6 +18,7 @@ func BenchmarkSpeedInsert(b *testing.B) {
 	}
 }
 
+// 767.6 ns/op
 func BenchmarkSearchList(b *testing.B) {
 	b.StopTimer()
 
@@ -29,5 +31,21 @@ func BenchmarkSearchList(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		skipList.Search(15321)
+	}
+}
+
+// 1004 ns/op
+func BenchmarkDeleteElement(b *testing.B) {
+	b.StopTimer()
+
+	skipList := NewSkipList(32, 0.4)
+	for i := range b.N {
+		skipList.Add(i, 3)
+	}
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		skipList.Delete(i)
 	}
 }

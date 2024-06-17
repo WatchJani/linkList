@@ -6,6 +6,13 @@ import (
 	"root/stack"
 )
 
+const (
+	UpNode    = 0
+	RightNode = 1
+	DownNode  = 2
+	LeftNode  = 3
+)
+
 type SkipList struct {
 	Root         *Node
 	CurrentLevel int
@@ -15,18 +22,16 @@ type SkipList struct {
 }
 
 type Node struct {
-	LeftLink  *Node
-	RightLink *Node
-	NextNode  *Node
-	UpNode    *Node
+	Direction []*Node
 	Key       int
 	Value     int
 }
 
 func NewNode(key, value int) *Node {
 	return &Node{
-		Key:   key,
-		Value: value,
+		Key:       key,
+		Value:     value,
+		Direction: make([]*Node, 4),
 	}
 }
 
@@ -49,22 +54,22 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 		//update next link by horizontally
 		newNode := NewNode(key, value)
 
-		newNode.NextNode = prevuesNode //next node is node up
-		prevuesNode.UpNode = newNode
+		newNode.Direction[DownNode] = prevuesNode //next node is node up
+		prevuesNode.Direction[UpNode] = newNode
 		//update left right link
 		if node := s.Stack.Pop(); node != nil {
 			if key > node.Key {
-				rightNode := node.RightLink
-				newNode.LeftLink = node
-				newNode.RightLink = rightNode
+				rightNode := node.Direction[RightNode]
+				newNode.Direction[LeftNode] = node
+				newNode.Direction[RightNode] = rightNode
 
-				node.RightLink = newNode
+				node.Direction[RightNode] = newNode
 				if rightNode != nil {
-					rightNode.LeftLink = newNode
+					rightNode.Direction[LeftNode] = newNode
 				}
 			} else {
-				newNode.RightLink = node
-				node.LeftLink = newNode
+				newNode.Direction[RightNode] = node
+				node.Direction[LeftNode] = newNode
 			}
 		}
 
@@ -89,17 +94,17 @@ func (s *SkipList) SearchInsert(key int) *Node {
 	current := s.Root
 
 	for i := s.CurrentLevel; i > 0; i-- {
-		for current.RightLink != nil && current.RightLink.Key < key { //stop on left side
-			current = current.RightLink
+		for current.Direction[RightNode] != nil && current.Direction[RightNode].Key < key { //stop on left side
+			current = current.Direction[RightNode]
 		}
 
-		for current.LeftLink != nil && current.Key > key {
-			current = current.LeftLink
+		for current.Direction[LeftNode] != nil && current.Key > key {
+			current = current.Direction[LeftNode]
 		}
 
-		if current.NextNode != nil {
+		if current.Direction[DownNode] != nil {
 			s.Stack.Push(current)
-			current = current.NextNode
+			current = current.Direction[DownNode]
 		}
 	}
 
@@ -108,23 +113,22 @@ func (s *SkipList) SearchInsert(key int) *Node {
 
 func (s *SkipList) Add(key, value int) {
 	zeroLevelNode := NewNode(key, value)
-
 	current := s.SearchInsert(key)
 
 	if current != nil {
 		if key > current.Key {
-			rightNode := current.RightLink      //save right
-			zeroLevelNode.LeftLink = current    //link left
-			zeroLevelNode.RightLink = rightNode //link
+			rightNode := current.Direction[RightNode]      //save right
+			zeroLevelNode.Direction[LeftNode] = current    //link left
+			zeroLevelNode.Direction[RightNode] = rightNode //link
 
-			current.RightLink = zeroLevelNode //link left node with new node
+			current.Direction[RightNode] = zeroLevelNode //link left node with new node
 			if rightNode != nil {
-				rightNode.LeftLink = zeroLevelNode
+				rightNode.Direction[LeftNode] = zeroLevelNode
 			}
 		} else {
 			//just left side
-			zeroLevelNode.RightLink = current
-			current.LeftLink = zeroLevelNode
+			zeroLevelNode.Direction[RightNode] = current
+			current.Direction[LeftNode] = zeroLevelNode
 		}
 	}
 
@@ -141,18 +145,18 @@ func (s *SkipList) PrintLeftRight() {
 	}
 
 	for i := s.CurrentLevel; i > 0; i-- {
-		for current.LeftLink != nil {
-			current = current.LeftLink
+		for current.Direction[LeftNode] != nil {
+			current = current.Direction[LeftNode]
 		}
 
-		if current.NextNode != nil {
-			current = current.NextNode
+		if current.Direction[DownNode] != nil {
+			current = current.Direction[DownNode]
 		}
 	}
 
 	for current != nil {
 		fmt.Println(current.Key)
-		current = current.RightLink
+		current = current.Direction[RightNode]
 	}
 }
 
@@ -165,18 +169,18 @@ func (s *SkipList) PrintRightLeft() {
 	}
 
 	for i := s.CurrentLevel; i > 0; i-- {
-		for current.RightLink != nil {
-			current = current.RightLink
+		for current.Direction[RightNode] != nil {
+			current = current.Direction[RightNode]
 		}
 
-		if current.NextNode != nil {
-			current = current.NextNode
+		if current.Direction[DownNode] != nil {
+			current = current.Direction[DownNode]
 		}
 	}
 
 	for current != nil {
 		fmt.Println(current.Key)
-		current = current.LeftLink
+		current = current.Direction[LeftNode]
 	}
 }
 
@@ -188,8 +192,8 @@ func (s *SkipList) Search(key int) *Node {
 		return currentNode
 	}
 
-	if currentNode.RightLink != nil && currentNode.RightLink.Key == key {
-		return currentNode.RightLink
+	if currentNode.Direction[RightNode] != nil && currentNode.Direction[RightNode].Key == key {
+		return currentNode.Direction[RightNode]
 	}
 
 	return nil
@@ -199,32 +203,32 @@ func (s *SkipList) Delete(key int) {
 	node := s.Search(key)
 
 	if node != nil && s.Root.Key == node.Key {
-		for s.Root != nil && s.Root.LeftLink == nil && s.Root.RightLink == nil {
+		for s.Root != nil && s.Root.Direction[LeftNode] == nil && s.Root.Direction[RightNode] == nil {
 			s.CurrentLevel--
-			s.Root = s.Root.NextNode
+			s.Root = s.Root.Direction[DownNode]
 		}
 
 		if s.Root != nil {
-			if s.Root.LeftLink != nil {
-				s.Root = s.Root.LeftLink
-			} else if s.Root.RightLink != nil {
-				s.Root = s.Root.RightLink
+			if s.Root.Direction[LeftNode] != nil {
+				s.Root = s.Root.Direction[LeftNode]
+			} else if s.Root.Direction[RightNode] != nil {
+				s.Root = s.Root.Direction[RightNode]
 			}
 		}
 	}
 
 	for node != nil {
-		if node.LeftLink != nil {
-			node.LeftLink.RightLink = node.RightLink
+		if node.Direction[LeftNode] != nil {
+			node.Direction[LeftNode].Direction[RightNode] = node.Direction[RightNode]
 		}
 
-		if node.RightLink != nil {
-			node.RightLink.LeftLink = node.LeftLink
+		if node.Direction[RightNode] != nil {
+			node.Direction[RightNode].Direction[LeftNode] = node.Direction[LeftNode]
 		}
 
-		node.LeftLink = nil
-		node.RightLink = nil
+		node.Direction[LeftNode] = nil
+		node.Direction[RightNode] = nil
 
-		node = node.UpNode
+		node = node.Direction[UpNode]
 	}
 }
