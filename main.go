@@ -1,39 +1,26 @@
 package main
 
 import (
+	"fmt"
 	skipList "root/skip_list"
 )
 
 func main() {
-	skipList := skipList.NewSkipList(32, 0.4)
+	skipList := skipList.NewSkipList(32, 0.6)
+
+	fmt.Println(skipList.Root)
 
 	//insert
 	for i := 0; i < 100; i++ {
 		skipList.Add(i, 3)
 	}
 
-	// current := skipList.Root
-
-	// for i := skipList.CurrentLevel; i > 0; i-- {
-	// 	for current.LeftLink != nil {
-	// 		current = current.LeftLink
-	// 	}
-
-	// 	if current.NextNode != nil {
-	// 		current = current.NextNode
-	// 	}
-	// }
-
-	// fmt.Println(current.RightLink)
-
-	// skipList.PrintRightLeft()
-	// fmt.Println("========")
-
-	skipList.PrintRightLeft()
-	// //delete
 	for i := 0; i < 100; i++ {
 		skipList.Delete(i)
 	}
 
-	skipList.Add(1, 3)
+	skipList.Add(2, 1)
+	skipList.Add(15, 1)
+
+	fmt.Println(skipList.Search(2))
 }

@@ -108,6 +108,7 @@ func (s *SkipList) SearchInsert(key int) *Node {
 
 func (s *SkipList) Add(key, value int) {
 	zeroLevelNode := NewNode(key, value)
+
 	current := s.SearchInsert(key)
 
 	if current != nil {
@@ -180,6 +181,7 @@ func (s *SkipList) PrintRightLeft() {
 }
 
 func (s *SkipList) Search(key int) *Node {
+
 	currentNode := s.SearchInsert(key)
 
 	if currentNode.Key == key {
@@ -196,8 +198,9 @@ func (s *SkipList) Search(key int) *Node {
 func (s *SkipList) Delete(key int) {
 	node := s.Search(key)
 
-	if s.Root.Key == node.Key {
+	if node != nil && s.Root.Key == node.Key {
 		for s.Root != nil && s.Root.LeftLink == nil && s.Root.RightLink == nil {
+			s.CurrentLevel--
 			s.Root = s.Root.NextNode
 		}
 
