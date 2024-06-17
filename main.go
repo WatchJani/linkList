@@ -1,19 +1,39 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	skipList "root/skip_list"
 )
 
 func main() {
-	skipList := skipList.NewSkipList(32, 0.2)
+	skipList := skipList.NewSkipList(32, 0.4)
 
-	for range 200 {
-		skipList.Add(rand.Intn(5000000), 3)
+	//insert
+	for i := 0; i < 100; i++ {
+		skipList.Add(i, 3)
 	}
 
-	fmt.Println("current level", skipList.CurrentLevel)
+	// current := skipList.Root
 
-	skipList.Print()
+	// for i := skipList.CurrentLevel; i > 0; i-- {
+	// 	for current.LeftLink != nil {
+	// 		current = current.LeftLink
+	// 	}
+
+	// 	if current.NextNode != nil {
+	// 		current = current.NextNode
+	// 	}
+	// }
+
+	// fmt.Println(current.RightLink)
+
+	// skipList.PrintRightLeft()
+	// fmt.Println("========")
+
+	skipList.PrintRightLeft()
+	// //delete
+	for i := 0; i < 100; i++ {
+		skipList.Delete(i)
+	}
+
+	skipList.Add(1, 3)
 }

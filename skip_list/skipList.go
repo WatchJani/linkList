@@ -11,13 +11,14 @@ type SkipList struct {
 	CurrentLevel int
 	MaxLevel     int
 	Luck         float64
-	*stack.Stack[*Node]
+	stack.Stack[*Node]
 }
 
 type Node struct {
 	LeftLink  *Node
 	RightLink *Node
 	NextNode  *Node
+	UpNode    *Node
 	Key       int
 	Value     int
 }
@@ -47,8 +48,9 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 	for FlipTheCoin(s.Luck) && tower < s.MaxLevel {
 		//update next link by horizontally
 		newNode := NewNode(key, value)
-		newNode.NextNode = prevuesNode //next node is node up
 
+		newNode.NextNode = prevuesNode //next node is node up
+		prevuesNode.UpNode = newNode
 		//update left right link
 		if node := s.Stack.Pop(); node != nil {
 			if key > node.Key {
@@ -77,8 +79,13 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 	}
 }
 
+func (n *Node) Update(key, value int) {
+	n.Key = key
+	n.Value = value
+}
+
 // left <-> right | search
-func (s *SkipList) Search(key int) *Node {
+func (s *SkipList) SearchInsert(key int) *Node {
 	current := s.Root
 
 	for i := s.CurrentLevel; i > 0; i-- {
@@ -86,7 +93,6 @@ func (s *SkipList) Search(key int) *Node {
 			current = current.RightLink
 		}
 
-		//what if we have one element(root) and new element is lower then root
 		for current.LeftLink != nil && current.Key > key {
 			current = current.LeftLink
 		}
@@ -102,10 +108,9 @@ func (s *SkipList) Search(key int) *Node {
 
 func (s *SkipList) Add(key, value int) {
 	zeroLevelNode := NewNode(key, value)
-	current := s.Search(key)
+	current := s.SearchInsert(key)
 
 	if current != nil {
-		//in the middle and right
 		if key > current.Key {
 			rightNode := current.RightLink      //save right
 			zeroLevelNode.LeftLink = current    //link left
@@ -126,8 +131,13 @@ func (s *SkipList) Add(key, value int) {
 	s.Flush()
 }
 
-func (s *SkipList) Print() {
+// for delete
+func (s *SkipList) PrintLeftRight() {
 	current := s.Root
+
+	if current == nil {
+		return
+	}
 
 	for i := s.CurrentLevel; i > 0; i-- {
 		for current.LeftLink != nil {
@@ -139,12 +149,79 @@ func (s *SkipList) Print() {
 		}
 	}
 
-	var counter int
 	for current != nil {
-		counter++
 		fmt.Println(current.Key)
 		current = current.RightLink
 	}
+}
 
-	fmt.Println(counter)
+// for delete
+func (s *SkipList) PrintRightLeft() {
+	current := s.Root
+
+	if current == nil {
+		return
+	}
+
+	for i := s.CurrentLevel; i > 0; i-- {
+		for current.RightLink != nil {
+			current = current.RightLink
+		}
+
+		if current.NextNode != nil {
+			current = current.NextNode
+		}
+	}
+
+	for current != nil {
+		fmt.Println(current.Key)
+		current = current.LeftLink
+	}
+}
+
+func (s *SkipList) Search(key int) *Node {
+	currentNode := s.SearchInsert(key)
+
+	if currentNode.Key == key {
+		return currentNode
+	}
+
+	if currentNode.RightLink != nil && currentNode.RightLink.Key == key {
+		return currentNode.RightLink
+	}
+
+	return nil
+}
+
+func (s *SkipList) Delete(key int) {
+	node := s.Search(key)
+
+	if s.Root.Key == node.Key {
+		for s.Root != nil && s.Root.LeftLink == nil && s.Root.RightLink == nil {
+			s.Root = s.Root.NextNode
+		}
+
+		if s.Root != nil {
+			if s.Root.LeftLink != nil {
+				s.Root = s.Root.LeftLink
+			} else if s.Root.RightLink != nil {
+				s.Root = s.Root.RightLink
+			}
+		}
+	}
+
+	for node != nil {
+		if node.LeftLink != nil {
+			node.LeftLink.RightLink = node.RightLink
+		}
+
+		if node.RightLink != nil {
+			node.RightLink.LeftLink = node.LeftLink
+		}
+
+		node.LeftLink = nil
+		node.RightLink = nil
+
+		node = node.UpNode
+	}
 }
