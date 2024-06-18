@@ -6,35 +6,35 @@ import (
 	"root/stack"
 )
 
-type SkipList struct {
-	Root         *Node
+type SkipList[K int | string | float32 | float64, V any] struct {
+	Root         *Node[K, V]
 	CurrentLevel int
 	MaxLevel     int
 	Luck         float64
-	stack.Stack[*Node]
+	stack.Stack[*Node[K, V]]
 }
 
-type Node struct {
-	LeftLink  *Node
-	RightLink *Node
-	UpNode    *Node
-	DownNode  *Node
-	Key       int
-	Value     int
+type Node[K, V any] struct {
+	LeftLink  *Node[K, V]
+	RightLink *Node[K, V]
+	UpNode    *Node[K, V]
+	DownNode  *Node[K, V]
+	Key       K
+	Value     V
 }
 
-func NewNode(key, value int) *Node {
-	return &Node{
+func NewNode[K int | string | float32 | float64, V any](key K, value V) *Node[K, V] {
+	return &Node[K, V]{
 		Key:   key,
 		Value: value,
 	}
 }
 
-func NewSkipList(maxLevel int, luck float64) *SkipList {
-	return &SkipList{
+func NewSkipList[K int | string | float32 | float64, V any](maxLevel int, luck float64) *SkipList[K, V] {
+	return &SkipList[K, V]{
 		MaxLevel: maxLevel,
 		Luck:     luck,
-		Stack:    stack.NewStack[*Node](maxLevel),
+		Stack:    stack.NewStack[*Node[K, V]](maxLevel),
 	}
 }
 
@@ -42,7 +42,7 @@ func FlipTheCoin(luck float64) bool {
 	return luck > rand.Float64()
 }
 
-func (s *SkipList) BuildTower(prevuesNode *Node) {
+func (s *SkipList[K, V]) BuildTower(prevuesNode *Node[K, V]) {
 	key, value, tower := prevuesNode.Key, prevuesNode.Value, 1 //this is the problem!!!
 
 	for FlipTheCoin(s.Luck) && tower < s.MaxLevel {
@@ -79,13 +79,13 @@ func (s *SkipList) BuildTower(prevuesNode *Node) {
 	}
 }
 
-func (n *Node) Update(key, value int) {
+func (n *Node[K, V]) Update(key K, value V) {
 	n.Key = key
 	n.Value = value
 }
 
 // left <-> right | search
-func (s *SkipList) SearchInsert(key int) *Node {
+func (s *SkipList[K, V]) SearchInsert(key K) *Node[K, V] {
 	current := s.Root
 
 	for i := s.CurrentLevel; i > 0; i-- {
@@ -106,7 +106,7 @@ func (s *SkipList) SearchInsert(key int) *Node {
 	return current
 }
 
-func (s *SkipList) Add(key, value int) {
+func (s *SkipList[K, V]) Add(key K, value V) {
 	zeroLevelNode := NewNode(key, value)
 	current := s.SearchInsert(key)
 
@@ -147,7 +147,7 @@ func (s *SkipList) Add(key, value int) {
 	s.Flush()
 }
 
-func (s *SkipList) Search(key int) *Node {
+func (s *SkipList[K, V]) Search(key K) *Node[K, V] {
 	currentNode := s.SearchInsert(key)
 
 	if currentNode != nil && currentNode.Key == key {
@@ -161,7 +161,7 @@ func (s *SkipList) Search(key int) *Node {
 	return nil
 }
 
-func (s *SkipList) Delete(key int) {
+func (s *SkipList[K, V]) Delete(key K) {
 	node := s.Search(key)
 
 	if node != nil && s.Root.Key == node.Key {
@@ -195,7 +195,7 @@ func (s *SkipList) Delete(key int) {
 	}
 }
 
-func (s *SkipList) PrintLeftRight() {
+func (s *SkipList[K, V]) PrintLeftRight() {
 	current := s.Root
 
 	if current == nil {
@@ -218,7 +218,7 @@ func (s *SkipList) PrintLeftRight() {
 	}
 }
 
-func (s *SkipList) PrintRightLeft() {
+func (s *SkipList[K, V]) PrintRightLeft() {
 	current := s.Root
 
 	if current == nil {

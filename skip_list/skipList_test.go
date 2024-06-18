@@ -9,7 +9,7 @@ import (
 func BenchmarkSpeedInsert(b *testing.B) {
 	b.StopTimer()
 
-	skipList := NewSkipList(32, 0.5)
+	skipList := NewSkipList[int, int](32, 0.5)
 
 	b.StartTimer()
 
@@ -22,7 +22,7 @@ func BenchmarkSpeedInsert(b *testing.B) {
 func BenchmarkSearchList(b *testing.B) {
 	b.StopTimer()
 
-	skipList := NewSkipList(32, 0.4)
+	skipList := NewSkipList[int, int](32, 0.4)
 	for i := range 1000000 {
 		skipList.Add(i, 3)
 	}
@@ -38,7 +38,7 @@ func BenchmarkSearchList(b *testing.B) {
 func BenchmarkDeleteElement(b *testing.B) {
 	b.StopTimer()
 
-	skipList := NewSkipList(32, 0.4)
+	skipList := NewSkipList[int, int](32, 0.4)
 	for i := range b.N {
 		skipList.Add(i, 3)
 	}
