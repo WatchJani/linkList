@@ -1,18 +1,13 @@
 package main
 
-import (
-	skipList "root/skip_list"
-)
+import timeExpire "root/time_expire"
 
 func main() {
-	skipList := skipList.NewSkipList[int, int](32, 0.6)
+	expire := timeExpire.NewTimeExpire()
 
-	for range 100 {
-		skipList.Add(2, 0)
+	for range 10000 {
+		expire.AppendData(timeExpire.RandomData())
 	}
 
-	skipList.Add(3, 1)
-
-	skipList.PrintLeftRight()
-
+	expire.TimeValue.PrintLeftRight()
 }

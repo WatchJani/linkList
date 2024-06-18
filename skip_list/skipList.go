@@ -106,7 +106,7 @@ func (s *SkipList[K, V]) SearchInsert(key K) *Node[K, V] {
 	return current
 }
 
-func (s *SkipList[K, V]) Add(key K, value V) {
+func (s *SkipList[K, V]) Add(key K, value V) *Node[K, V] {
 	zeroLevelNode := NewNode(key, value)
 	current := s.SearchInsert(key)
 
@@ -116,7 +116,7 @@ func (s *SkipList[K, V]) Add(key K, value V) {
 				current.Value = value
 				current = current.UpNode
 			}
-			return
+			return nil
 		}
 
 		if current.RightLink != nil && current.RightLink.Key == key {
@@ -124,7 +124,7 @@ func (s *SkipList[K, V]) Add(key K, value V) {
 				current.RightLink.Value = value
 				current.RightLink = current.RightLink.UpNode
 			}
-			return
+			return nil
 		}
 
 		if key > current.Key {
@@ -145,6 +145,8 @@ func (s *SkipList[K, V]) Add(key K, value V) {
 
 	s.BuildTower(zeroLevelNode)
 	s.Flush()
+
+	return zeroLevelNode
 }
 
 func (s *SkipList[K, V]) Search(key K) *Node[K, V] {
